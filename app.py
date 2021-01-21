@@ -35,7 +35,7 @@ if data_file is not None:
         end_date = st.sidebar.date_input('End date', datetime.date(2020,11,1))
         return start_date, end_date
 
-# st.pyplot()
+
     if radio_select == 'Course':
 
         course = select_course()
@@ -98,4 +98,32 @@ if data_file is not None:
                 st.dataframe(df)
         
         course_info()
+
+    if radio_select == 'Student':
+
+        md['cn'] = md['Course Name'].map({'Climate Change and Adaptation':'Climate Change and Adaptation', 'Cover Crop':'Cover Crop',\
+       'Database Analysis and Design':'Database Analysis and Design', 'Environmental Geology':'Environmental Geology',\
+       'Food Microbiology': 'Food Microbiology', 'Geodesy and Topography':'Geodesy and Topography',\
+       'Geographic Information System and Remote Sensing':'GIS',\
+       'Image Processing':'Image Processing', 'Introduction to Computer Science': 'CS',\
+       'Natural Language Processing':'NLP', 'Software Engineering':'Software Engineering',\
+       'Strength of Material':'Strength of Material', 'Topographic Surveying':'Topographic Surveying'})
+        
+        s = plt.figure(figsize=(4,6), dpi=250)
+        g2 = sns.countplot(y="cn", hue = 'Sex', data=md)
+        for p in g2.patches:
+                percentage = '{:.0f}'.format(p.get_width())
+                x = p.get_x() + p.get_width() + 0.02
+                y = (p.get_y() + p.get_height()/2) + 0.15
+                g2.annotate(percentage, (x, y))
+                
+        plt.title("Number of students in each courses")
+        plt.xlabel('Number of students')
+        plt.ylabel('Courses')
+        # plt.show()
+        # plt.savefig('Number of students in each courses.png')
+
+        col1,col2 = st.beta_columns(2)
+        with col1:
+            st.write(s)
 
