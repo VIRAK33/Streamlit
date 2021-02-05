@@ -1,33 +1,4 @@
-#Project goal: 
-Is to visual a dataset graphically to better understand and analyses the data. We focus on students' learning progress dataset which is obtained from Moodle learning management system. build a web app for testing.
-#Tools and Libraries
-Anaconda, Jupiter, Python, Flash python framework (another framework is also ok), matplotlib, seaborn, 
-#Project main requirements:
-1)	Course
--	Show all courses and all students in each course
--	Give a summary info for each course (type ofO course material scorm or html/resource?, how many students enrolled? how many female and male?, how many are active during time t1 to t2?)
--	Show students learning progress of a selected course during a period of time (during startDate and endDate filter).
--	How many students are active during the time t1 to t2. (t1 and t2 are date timestamp) (active is basically mean they are access to learn the course. can be validated via the completionState column in dataset)
--	Show a summary of a course (how many students enrolled?, how many males and females? how many of them are currently active within the past 2 weeks?, ....)
--	List all courses in each department order by academic year and student level year.
--	Give a summary info for each department in a specified academic year (how many courses? how many students in each course, how many females and males? how many of them are currently active)
-...etc.
-
-
-2)	Student
--	List all students in each year for each department.
--	Search all courses that a student enrolled in (e.g Dara)
-**-	List all courses that a student is in active access (active status if students access to lesson during the past 2 weeks) (can allow to select period, it can be the past 1, 2,3 or 4 weeks)
--	Show learning progress (how many lessons finished?) of all students in each course in GIC department
--	(can allow to select another department too)
--	...etc.
-
-3)	Completion
--	List all students who finished less than 5 lessons in each course.
--	List all students who finished more than 5 lessons in each course.
--	List all students who finished more than 7 lessons in each course.
--	List all students who finished more than 10 lessons in each course.
--	Give a summary of learning progress of students in each course (show students who finished (completionState is 1) more than 6 lessons)
--	Give a summary of learning progress of students in each course (show students who finished 6<lesson<=10)
--	Give a summary of learning progress of students in each course (show students who finished lesson>10)
--	-...etc.
+numpy==1.15.0
+pandas==0.23.4
+streamlit==0.60.0
+seaborn==0.9.0

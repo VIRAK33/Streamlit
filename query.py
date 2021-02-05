@@ -7,23 +7,41 @@ import datetime
 
 def course_summary(md):
 
-    # start_date = '2020-10-22'
-    # end_date = '2020-12-01'
-
     df = []
     for i in range(0, len(md)):
         course = md.iloc[i][6]
         moduleName = md.iloc[i][7]
-        # male_student = md[ (md['Sex'] == 'M') & (md['Course Name'] == course) & (md['Completion Date'] >= str(start_date)) & (md['Completion Date'] <= str(end_date))]
-        # female_student = md[ (md['Sex'] == 'F') & (md['Course Name'] == course) & (md['Completion Date'] >= str(start_date)) & (md['Completion Date'] <= str(end_date)) ]
-        male_student = md[ (md['Sex'] == 'M') & (md['Course Name'] == course)]
-        female_student = md[ (md['Sex'] == 'F') & (md['Course Name'] == course)]
-        m = male_student['ID'].count()
-        f = female_student['ID'].count()
-
-        if [course,moduleName,m,f] not in df:
-            df.insert(i, [course,moduleName,m,f])
 
 
-    df = pd.DataFrame(df, columns = ['Course', 'Module Name', 'Male Student Enroll', 'Female Student Enroll'])
+        if [course,moduleName] not in df:
+            df.insert(i, [course,moduleName])
+
+
+    df = pd.DataFrame(df, columns = ['Course', 'Module Name'])
+
+
     return df
+
+def courseStudent(md,course):
+    if course == 'All':
+        progress = md[(md['State'] == 1)]
+    else:
+        progress = md[(md['State'] == 1) & (md['Course Name'] == course)]
+    # pg = progress.groupby(['Student Name','Course Name']).count()
+    # print(pg[['ID']])
+    arr = []
+    for i in range(0, len(progress)):
+        name = progress.iloc[i][2]
+        sex =  progress.iloc[i][3]
+        course = progress.iloc[i][6]
+
+        completed = progress[progress['Student Name'] == name].count()
+
+
+        if [name, sex,course, completed[0]] not in arr:
+            arr.insert(i, [name, sex, course, completed[0]])
+
+
+    pro = pd.DataFrame(arr, columns = ['Student Name', 'Sex', 'Course', 'Completed'])
+    pro.sort_values(by=['Student Name'], inplace=True)
+    return pro
