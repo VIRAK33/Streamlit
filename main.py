@@ -13,7 +13,7 @@ from io import StringIO, BytesIO
 
 module_config.style()
 
-
+sns.set_theme(style="darkgrid")
 
 def download_csv(md):
     csv = md.to_csv(index=False)
@@ -49,7 +49,7 @@ if data_file is not None:
     # Course = side.select_course(md)
     if radio_select == 'Course':
         option_course = ['All courses and students', 'Course Summary', 'Student Learning Progress',
-                        'Active Students', 'All course in Department', 'Department Summary'
+                        'Recently active Students', 'All course in Department', 'Department Summary'
                         ]
         question = side.features(option_course)
 
@@ -58,33 +58,66 @@ if data_file is not None:
 
         # Select question 0 "All courses and students"
         if question == option_course[0]:
-            # sns.set_theme(style="darkgrid")
             course = st.selectbox(
                 'Select course:',
                 (all_courses)
             )
             col1,col2 = st.beta_columns(2)
-            # with col1:
-            md = md[['ID', 'Student Name', 'Sex', 'Group', 'Department', 'Course Name', 'State', 'Completion Date']]
+            with col1:
+                md = md[['ID', 'Student Name', 'Sex', 'Group', 'Department', 'Course Name', 'State', 'Completion Date']]
 
-            if course != 'All':
-                md = md[md['Course Name'] == course ]
-                # st.write(md)
-                st.dataframe(data=md, height=600)
+                if course != 'All':
+                    md = md[md['Course Name'] == course ]
+                    # st.write(md)
+                    st.dataframe(data=md, height=600)
 
-            else:
-                # md.set_index('ID', inplace=True)
-                # st.dataframe(md.assign(hack='').set_index('No'))
-                st.dataframe(data=md, height=600)
-            
-            download_csv(md)
+                else:
+                    st.dataframe(data=md, height=600)
+                
+                download_csv(md)
 
+            with col2:
+                md = md.rename(columns={'userid':'ID', 'username': 'Student ID', 'firstname':'Student Name', 'phone1':'Sex', 'department':'Department', 'lastname':'Group', 'courseName':'Course Name', 'moduleName':'Module Name', 'completionstate': 'Completion State', 'CompletionDate':'Completion Date'})
+                md['CN']=df['Course Name'].map({'Climate Change and Adaptation':'CCA', 'Cover Crop':'CC',\
+                    'Database Analysis and Design':'DAD', 'Environmental Geology':'EG',\
+                    'Food Microbiology':'FM', 'Geodesy and Topography':'GT',\
+                    'Geographic Information System and Remote Sensing':'GISRS',\
+                    'Image Processing':'IM', 'Introduction to Computer Science':'ICS',\
+                    'Natural Language Processing':'NLP', 'Software Engineering':'SE',\
+                    'Strength of Material':'SM', 'Topographic Surveying':'TS'})
+                if course == 'All':
+                    s = plt.figure(figsize=(11,12), dpi=250)
+                    g = sns.countplot( y='CN',hue = 'Sex', data = md)
+                    for p in g.patches:
+                            percentage = '{:.0f}'.format(p.get_width())
+                            x = p.get_x() + p.get_width() + 0.02
+                            y = (p.get_y() + p.get_height()/2) + 0.15
+                            g.annotate(percentage, (x, y))
+                            
+                    plt.title("Total of student access in each course")
+                    plt.xlabel('Number of students enrolled')
+                    plt.ylabel('Courses')
+                    s
+                else:
+                    s = plt.figure(figsize=(11,12), dpi=250)
+                    g = sns.countplot( x='CN',hue = 'Sex', data = md)
+                    for p in g.patches:
+                        percentage = '{:.0f}'.format(p.get_height())
+                        x = (p.get_x() + p.get_width()/2)
+                        y = (p.get_y() + p.get_height()) + 0.5
+                        g.annotate(percentage, (x, y))
+                            
+                    plt.title("Total of student access in each course")
+                    plt.xlabel('Number of students enrolled')
+                    plt.ylabel('Courses')
+                    s
 
             #Plot Graph_______
             # if course == 'All':
             
 
             #_______
+
 
         # Select question 1 "Course summary"
         if question == option_course[1]:
@@ -165,6 +198,7 @@ if data_file is not None:
 
                 
 
+
         if question == option_course[2]:
             course = st.selectbox('Select course:',(md['Course Name'].unique()))
             col1,col2 = st.beta_columns(2)
@@ -228,6 +262,8 @@ if data_file is not None:
                     st.markdown(get_image_download_link(s), unsafe_allow_html=True)
 
 
+
+
         if question == option_course[3]:
             # st.write(df)
             course = st.selectbox('Select course:',(md['Course Name'].unique()))
@@ -261,35 +297,46 @@ if data_file is not None:
                     
 
             pro = pd.DataFrame(arr, columns = ['ID', 'Student Name', 'Sex', 'Course', 'Completed'])
+            pro.sort_values(by=['Student Name'], inplace=True)
             c1, c2 = st.beta_columns(2)
             with c1:
+                
                 st.dataframe(data=pro, height=600)
+                download_csv(pro)
             with c2:
                 totalRecord = pro['Completed'].count()
+                maxLesson = pro['Completed'].max()
                 if totalRecord > 0:
-                    if totalRecord > 25:
-                        s = plt.figure()
-                        g2 = sns.barplot(y=pro['Student Name'], x= pro['Completed'])
-                                
-                        plt.title("Student Learing Progress")
-                        plt.xlabel('Completed Courses')
-                        plt.ylabel('Student Name')
-                        plt.ylim(0, 25)
-                        # plt.show()
-                        plt.savefig('images/Student Learning Proress/'+ str(i) +'.png', bbox_inches='tight')
-                        s
-                    else:
-                        s = plt.figure()
-                        g2 = sns.barplot(y=pro['Student Name'], x= pro['Completed'])
-                                
-                        plt.title("Student Learing Progress")
-                        plt.xlabel('Completed Courses')
-                        plt.ylabel('Student Name')
-                        # plt.ylim(0, 25)
-                        # plt.show()
-                        plt.savefig('images/Student Learning Proress/'+ str(i) +'.png', bbox_inches='tight')
-                        s 
 
+                    s = plt.figure(figsize=(10,totalRecord/3)) # 1 inch has 3 record
+                    g2 = sns.barplot(y=pro['Student Name'], x= pro['Completed'])
+
+                    for p in g2.patches:
+                        percentage = '{:.0f}'.format(p.get_width())
+
+                        x = p.get_x() + p.get_width() + 0.02
+                        y = (p.get_y() + p.get_height()/2) + 0.15
+                        g2.annotate(percentage, (x, y))
+
+                    x_ticks = np.arange(0, maxLesson + 1, 1)
+                    plt.xticks(x_ticks)
+                    plt.title("Recently Active Student with Learning Progress")
+                    plt.xlabel('Completed Courses')
+                    plt.ylabel('Student Name')
+                    plt.savefig('images/Student Learning Proress/'+ str(i) +'.png', bbox_inches='tight')
+                    s
+                    st.markdown(get_image_download_link(s), unsafe_allow_html=True)
+
+
+
+        if question == option_course[4]:
+            md = df
+            data = md['Department'].unique()
+            department = ['GRU','GIC','GGG','GCA','GCI-GRU']
+            dep = st.selectbox('Select Department:',data)
+            md = md[md['Department'] == dep]
+            md = qr.course_summary(md)
+            st.dataframe(data=md, height=600)
 
     if radio_select == 'Student':
         
