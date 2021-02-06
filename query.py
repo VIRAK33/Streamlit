@@ -11,6 +11,24 @@ def course_summary(md):
     for i in range(0, len(md)):
         course = md.iloc[i][6]
         moduleName = md.iloc[i][7]
+        dep = md.iloc[i][4]
+
+
+        if [course,moduleName,dep] not in df:
+            df.insert(i, [course,moduleName,dep])
+
+
+    df = pd.DataFrame(df, columns = ['Course', 'Module Name','Department'])
+
+
+    return df
+
+def course_summary_(md):
+    
+    df = []
+    for i in range(0, len(md)):
+        course = md.iloc[i][6]
+        moduleName = md.iloc[i][7]
 
 
         if [course,moduleName] not in df:
@@ -18,7 +36,6 @@ def course_summary(md):
 
 
     df = pd.DataFrame(df, columns = ['Course', 'Module Name'])
-
 
     return df
 

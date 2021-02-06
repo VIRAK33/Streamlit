@@ -43,13 +43,16 @@ if data_file is not None:
     # st.write(file_details)
     df = pd.read_csv(data_file)
     df = df.rename(columns={'userid':'userid', 'username': 'ID', 'firstname':'Student Name', 'phone1':'Sex', 'department':'Department', 'lastname':'Group', 'courseName':'Course Name', 'moduleName':'Module Name', 'completionstate': 'State', 'CompletionDate':'Completion Date'})
+    df = df[(df.Group != 'test') & (df.Group != 'Channa') & (df.Group != 'RATHPISEY') & (df.Group != 'Daneth') & (df.Group != 'Sreylam') & (df.Group != 'Sinkeo')]
+    
     md = df
+    md['Year'] = md['Group'].apply(lambda x: x.split('-')[0])
     radio_select = st.sidebar.radio('Feature', ['Course', 'Student', 'Completion'])
 
     # Course = side.select_course(md)
     if radio_select == 'Course':
         option_course = ['All courses and students', 'Course Summary', 'Student Learning Progress',
-                        'Recently active Students', 'All course in Department', 'Department Summary'
+                        'Recently active Students', 'Department Summary'
                         ]
         question = side.features(option_course)
 
@@ -66,12 +69,11 @@ if data_file is not None:
             with col1:
                 md = md[['ID', 'Student Name', 'Sex', 'Group', 'Department', 'Course Name', 'State', 'Completion Date']]
 
-                if course != 'All':
-                    md = md[md['Course Name'] == course ]
-                    # st.write(md)
+                if course == 'All':
                     st.dataframe(data=md, height=600)
 
                 else:
+                    md = md[md['Course Name'] == course ]
                     st.dataframe(data=md, height=600)
                 
                 download_csv(md)
@@ -86,31 +88,35 @@ if data_file is not None:
                     'Natural Language Processing':'NLP', 'Software Engineering':'SE',\
                     'Strength of Material':'SM', 'Topographic Surveying':'TS'})
                 if course == 'All':
-                    s = plt.figure(figsize=(11,12), dpi=250)
-                    g = sns.countplot( y='CN',hue = 'Sex', data = md)
-                    for p in g.patches:
-                            percentage = '{:.0f}'.format(p.get_width())
-                            x = p.get_x() + p.get_width() + 0.02
-                            y = (p.get_y() + p.get_height()/2) + 0.15
-                            g.annotate(percentage, (x, y))
-                            
-                    plt.title("Total of student access in each course")
-                    plt.xlabel('Number of students enrolled')
-                    plt.ylabel('Courses')
-                    s
+                    totalRecord = md['Sex'].count()
+                    if totalRecord > 0:
+                        s = plt.figure(figsize=(7,8), dpi=250)
+                        g = sns.countplot( y='CN',hue = 'Sex', data = md)
+                        for p in g.patches:
+                                percentage = '{:.0f}'.format(p.get_width())
+                                x = p.get_x() + p.get_width() + 0.02
+                                y = (p.get_y() + p.get_height()/2) + 0.15
+                                g.annotate(percentage, (x, y))
+                                
+                        plt.title("Total of student access in each course")
+                        plt.xlabel('Number of students enrolled')
+                        plt.ylabel('Courses')
+                        s
                 else:
-                    s = plt.figure(figsize=(11,12), dpi=250)
-                    g = sns.countplot( x='CN',hue = 'Sex', data = md)
-                    for p in g.patches:
-                        percentage = '{:.0f}'.format(p.get_height())
-                        x = (p.get_x() + p.get_width()/2)
-                        y = (p.get_y() + p.get_height()) + 0.5
-                        g.annotate(percentage, (x, y))
-                            
-                    plt.title("Total of student access in each course")
-                    plt.xlabel('Number of students enrolled')
-                    plt.ylabel('Courses')
-                    s
+                    totalRecord = md['Sex'].count()
+                    if totalRecord > 0:
+                        s = plt.figure(figsize=(7,8), dpi=250)
+                        g = sns.countplot( x='CN',hue = 'Sex', data = md)
+                        for p in g.patches:
+                            percentage = '{:.0f}'.format(p.get_height())
+                            x = (p.get_x() + p.get_width()/2)
+                            y = (p.get_y() + p.get_height()) + 0.5
+                            g.annotate(percentage, (x, y))
+                                
+                        plt.title("Total of student access in: "+ course)
+                        plt.xlabel('Number of students enrolled')
+                        plt.ylabel('Courses')
+                        s
 
             #Plot Graph_______
             # if course == 'All':
@@ -123,9 +129,9 @@ if data_file is not None:
         if question == option_course[1]:
             course = st.selectbox('Select course:',all_courses)
             col1,col2 = st.beta_columns(2)
-            md = qr.course_summary(md)
+            md = qr.course_summary_(md)
             with col1:
-                st.dataframe(data=md, height=400)
+                st.dataframe(data=md, height=600)
                 # st.write(md)
                 download_csv(md)
 
@@ -136,8 +142,6 @@ if data_file is not None:
                     md = md.rename(columns={'userid':'ID', 'username': 'Username', 'firstname':'Student Name', 'phone1':'Sex', 'department':'Department', 'lastname':'Group', 'courseName':'Course Name', 'moduleName':'Module Name', 'completionstate': 'State', 'CompletionDate':'Completion Date'})
                     
                     progress = md[(md['State'] == 1)]
-                    # pg = progress.groupby(['Student Name','Course Name']).count()
-                    # print(pg[['ID']])
                     arr = []
                     for i in range(0, len(progress)):
                         name = progress.iloc[i][2]
@@ -156,9 +160,17 @@ if data_file is not None:
 
 
                     # plt.figure(figsize=(10,10), dpi=250)
-                    s = plt.figure(figsize=(10,8))
+                    s = plt.figure(figsize=(8,7))
 
-                    g2 = sns.countplot(hue= "Sex",y="Course",  data=pro)
+                    pro['CN']=pro['Course'].map({'Climate Change and Adaptation':'CCA', 'Cover Crop':'CC',\
+                    'Database Analysis and Design':'DAD', 'Environmental Geology':'EG',\
+                    'Food Microbiology':'FM', 'Geodesy and Topography':'GT',\
+                    'Geographic Information System and Remote Sensing':'GISRS',\
+                    'Image Processing':'IM', 'Introduction to Computer Science':'ICS',\
+                    'Natural Language Processing':'NLP', 'Software Engineering':'SE',\
+                    'Strength of Material':'SM', 'Topographic Surveying':'TS'})
+
+                    g2 = sns.countplot(hue= "Sex",y="CN",  data=pro)
 
                     for p in g2.patches:
                             percentage = '{:.0f}'.format(p.get_width())
@@ -179,9 +191,7 @@ if data_file is not None:
                     md = qr.courseStudent(df,course)
                     totalRecord = md['Sex'].count()
                     if totalRecord > 0:
-                        s = plt.figure()
-                        # fig, axes = plt.subplots(1, 3)
-                        s = plt.figure(figsize=(10,5))
+                        s = plt.figure(figsize=(8,7))
                         g2 = sns.countplot(x="Sex", data=md)
 
                         for p in g2.patches:
@@ -190,7 +200,7 @@ if data_file is not None:
                                 y = p.get_y() + p.get_height() + 0.4
                                 g2.annotate(percentage, (x, y))
                                 
-                        plt.title("Number of students in each course")
+                        plt.title("Number of students in: "+ course)
                         plt.xlabel('Gender')
                         plt.ylabel('Number of Students')
                         st.write(s) 
@@ -214,7 +224,7 @@ if data_file is not None:
                 endDate = st.date_input("End date", today)
             md = df
 
-            progress = md[(md['State'] == 1) & (md['Completion Date'] >= str(startDate)) & (md['Completion Date'] <= str(endDate)) & (md['Course Name'] == course)]
+            progress = md[(md['Completion Date'] >= str(startDate)) & (md['Completion Date'] <= str(endDate)) & (md['Course Name'] == course)]
             # pg = progress.groupby(['Firstname','Course Name']).count()
             # pg[['ID']]
             arr = []
@@ -254,8 +264,8 @@ if data_file is not None:
 
                     x_ticks = np.arange(0, maxLesson + 1, 1)
                     plt.xticks(x_ticks)
-                    plt.title("Student Learing Progress")
-                    plt.xlabel('Completed Courses')
+                    plt.title("Student Learing Progress: "+ course)
+                    plt.xlabel('Number of Completed Courses')
                     plt.ylabel('Student Name')
                     plt.savefig('images/Student Learning Proress/'+ str(i) +'.png', bbox_inches='tight')
                     s
@@ -320,7 +330,7 @@ if data_file is not None:
 
                     x_ticks = np.arange(0, maxLesson + 1, 1)
                     plt.xticks(x_ticks)
-                    plt.title("Recently Active Student with Learning Progress")
+                    plt.title("Recently Active Student with Learning Progress: "+ course)
                     plt.xlabel('Completed Courses')
                     plt.ylabel('Student Name')
                     plt.savefig('images/Student Learning Proress/'+ str(i) +'.png', bbox_inches='tight')
@@ -330,13 +340,143 @@ if data_file is not None:
 
 
         if question == option_course[4]:
-            md = df
             data = md['Department'].unique()
-            department = ['GRU','GIC','GGG','GCA','GCI-GRU']
-            dep = st.selectbox('Select Department:',data)
-            md = md[md['Department'] == dep]
-            md = qr.course_summary(md)
-            st.dataframe(data=md, height=600)
+            all_dep = np.insert(data, 0, 'All', axis=0)
+            # department = ['GRU','GIC','GGG','GCA','GCI-GRU']
+            department = st.selectbox('Select Department:',all_dep)
+
+            if department == 'All':
+                progress = md
+            else:
+                progress = md[md['Department']==department]
+
+            arr = []
+
+            studentInDepartment = []
+            for i in range(0, len(progress)):
+                id = progress.iloc[i][1]
+                name = progress.iloc[i][2]
+                sex =  progress.iloc[i][3]
+                dep = progress.iloc[i][4]
+                group = progress.iloc[i][5]
+                course = progress.iloc[i][6]
+                module = progress.iloc[i][7]
+                completedDate = progress.iloc[i][9]
+                year = progress.iloc[i][10]
+
+                if [id, name, sex,course,group, dep, module, year] not in arr:
+                    arr.insert(i, [id, name, sex, course,group, dep, module, year])
+                if [id, name, sex, dep, year] not in studentInDepartment:
+                    studentInDepartment.insert(i, [id, name, sex, dep, year])
+                    
+            md1 = pd.DataFrame(arr, columns = ['ID', 'Student Name', 'Sex', 'Course','Group', 'Department', 'Module', 'Year'])
+            listStudentInDepartment = pd.DataFrame(studentInDepartment, columns = ['ID', 'Student Name', 'Sex', 'Department', 'Year'])
+
+            arr_= []
+            
+            for i in range(0, len(md1)):
+                course = md1.iloc[i][3]
+                dep = md1.iloc[i][5]
+                module = md1.iloc[i][6]
+                year = md1.iloc[i][7]
+
+                m = md1[(md1['Course'] == course) & (md1['Sex'] == 'M')].count()
+                male = m[0]
+                f = md1[(md1['Course'] == course) & (md1['Sex'] == 'F')].count()
+                female = f[0]
+
+                if [course, year , male, female] not in arr_:
+                    arr_.insert(i,[course, year , male, female])
+            md2 = pd.DataFrame(arr_, columns = ['Course', 'Year' , 'Male', 'Female'])
+
+            col1,col2 = st.beta_columns(2)
+            with col1:
+                md2.sort_values(by=['Year'], inplace=True)
+                st.markdown('Number of students in each course:')
+                st.dataframe(data=md2,height=600, width=553)
+                download_csv(md2)
+
+                year_group = md['Year'].unique()
+                yearStudent = np.insert(year_group, 0, 'All', axis=0)
+
+                selectYear = ''
+                if department != 'All':
+                    selectYear = st.selectbox('Select Group Student:',yearStudent)    
+                    listStudentInDepartment.sort_values(by=['Student Name'], inplace=True)
+                    listStudentInDepartment_ = listStudentInDepartment
+                    st.markdown('List students in '+ department + " department:")
+
+                    if selectYear == 'All':   
+                        st.dataframe(data=listStudentInDepartment,height=600, width=553)
+                    else:
+                        listStudentInDepartment_ = listStudentInDepartment[listStudentInDepartment['Year'] == selectYear]
+                        st.dataframe(data=listStudentInDepartment_,height=600, width=553)
+                    download_csv(listStudentInDepartment_)
+
+            with col2:
+                s = plt.figure(figsize=(10,8))
+                if department == 'All':
+                    g = sns.countplot( y='Department',hue = 'Sex', data = listStudentInDepartment)
+                    for p in g.patches:
+                        percentage = '{:.0f}'.format(p.get_width())
+                        x = p.get_x() + p.get_width() + 0.08
+                        y = (p.get_y() + p.get_height()/2) + 0.05
+                        g.annotate(percentage, (x, y))
+                    plt.title("Total student in each Department")
+                    plt.xlabel('Number of Students')
+                    plt.ylabel('Department')
+                    plt.savefig('images/all department1.png', bbox_inches='tight')
+                    s
+                else:
+                    g = sns.countplot( x='Department',hue = 'Sex', data = listStudentInDepartment)
+                    for p in g.patches:
+                            percentage = '{:.0f}'.format(p.get_height())
+                            x = p.get_x() + p.get_width()/2
+                            y = (p.get_y() + p.get_height()) + 0.05
+                            g.annotate(percentage, (x, y))
+                    plt.title("Total student in department "+ department)
+                    plt.ylabel('Number of Students')
+                    plt.xlabel('Department')
+                    plt.savefig('images/all department1.png', bbox_inches='tight')
+                    s
+
+                st.markdown(get_image_download_link(s), unsafe_allow_html=True)  
+
+                md = df
+
+
+                today = datetime.date.today()
+                last14Day = today - timedelta(14)
+                if (department != 'All') & (selectYear != 'All'):
+                    st.markdown('List active student')
+                    # startDate = st.date_input('Start date', last14Day)
+                    startDate = st.date_input("Start date(last 14 days)", datetime.date(2020,9,1))
+
+                    endDate = st.date_input('End date', today)
+
+                    progress = md[(md['Department'] == department) & (md['Completion Date'] >= str(startDate)) & (md['Completion Date'] <= str(endDate)) & (md['Year'] == selectYear)]
+
+                    arr = []
+                    for i in range(0, len(progress)):
+                        id = progress.iloc[i][1]
+                        name = progress.iloc[i][2]
+                        sex =  progress.iloc[i][3]
+                        course = progress.iloc[i][6]
+                        
+                        completed = progress[progress['Student Name'] == name].count()
+
+
+                        if [id, name, sex] not in arr:
+                            arr.insert(i, [id, name, sex])
+                            
+
+                    pro = pd.DataFrame(arr, columns = ['ID', 'Student Name', 'Sex'])
+                    pro.sort_values(by=['Student Name'], inplace=True)
+                    st.dataframe(data=pro,height=600, width=553)
+                    download_csv(pro)
+                
+
+
 
     if radio_select == 'Student':
         

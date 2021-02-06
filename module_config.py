@@ -4,9 +4,9 @@ def style():
 
     st.markdown("""
     <style>
-    .effi0qh0{
-        color:white;
-    }
+    # .effi0qh0{
+    #     color:white;
+    # }
     .st-cs{
         color:white;
     }
