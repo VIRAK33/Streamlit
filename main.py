@@ -557,25 +557,27 @@ if data_file is not None:
             with col2:
 
                 maxLesson = md['Total Completed'].max()
-                s = plt.figure(figsize=(7,8)) # 1 inch has 3 record
-                g2 = sns.barplot(x=md['Course'], y= md['Total Completed'])
+                totalRecord = md['Total Completed'].count()
+                if totalRecord > 0:
+                    s = plt.figure(figsize=(7,8)) # 1 inch has 3 record
+                    g2 = sns.barplot(x=md['Course'], y= md['Total Completed'])
 
-                for p in g2.patches:
-                    percentage = '{:.0f}'.format(p.get_height())
+                    for p in g2.patches:
+                        percentage = '{:.0f}'.format(p.get_height())
 
-                    x = p.get_x() + p.get_width()/2
-                    y = (p.get_y() + p.get_height() + 0.02)
-                    g2.annotate(percentage, (x, y))
+                        x = p.get_x() + p.get_width()/2
+                        y = (p.get_y() + p.get_height() + 0.02)
+                        g2.annotate(percentage, (x, y))
 
 
-                plt.title("The Completed Lesson in each Course")
-                plt.xlabel('Courses')
-                plt.ylabel('Number of completed')
-                x_ticks = np.arange(0, maxLesson + 1, 1)
-                plt.yticks(x_ticks)
-                plt.savefig('images/Students/'+'The Completed Lesson in each Course.png', bbox_inches='tight')
-                s
-                st.markdown(get_image_download_link(s), unsafe_allow_html=True)
+                    plt.title("The Completed Lesson in each Course")
+                    plt.xlabel('Courses')
+                    plt.ylabel('Number of completed')
+                    x_ticks = np.arange(0, maxLesson + 1, 1)
+                    plt.yticks(x_ticks)
+                    plt.savefig('images/Students/'+'The Completed Lesson in each Course.png', bbox_inches='tight')
+                    s
+                    st.markdown(get_image_download_link(s), unsafe_allow_html=True)
 
 
 

@@ -117,6 +117,6 @@ def studentDetail(md, studentName):
         if [course[i], totalCourse[0]] not in arr:
             arr.insert(i, [course[i], totalCourse[0]])
         
-        md2 = pd.DataFrame(arr, columns = ['Course', 'Total Completed'])
+    md2 = pd.DataFrame(arr, columns = ['Course', 'Total Completed'])
 
     return md2
