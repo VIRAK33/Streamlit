@@ -1,4 +1,10 @@
 # Streamlit
 
+Requirements:
+Seaborn
+Stremlit
+Matplotlib
+Numpy
+
 ## Run streamlit file:
-streamlit run app.py
+streamlit run main.py
