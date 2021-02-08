@@ -325,8 +325,8 @@ if data_file is not None:
             last14Day = today - timedelta(14)
 
             with col1:
-                # startDate = st.date_input('Start date', last14Day)
-                startDate = st.date_input("Start date", datetime.date(2020,9,1))
+                startDate = st.date_input('Start date', last14Day)
+                # startDate = st.date_input("Start date", datetime.date(2020,9,1))
             with col2:
                 endDate = st.date_input('End date', today)
 
@@ -580,8 +580,6 @@ if data_file is not None:
                     st.markdown(get_image_download_link(s), unsafe_allow_html=True)
 
 
-
-                
 
 
 
